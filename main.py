@@ -99,8 +99,11 @@ def main():
         tbs = get_tbs()
         for j, name in enumerate(favorites):
             # 每20秒多等待一会
-            wait_secs = random.randint(5, 30) if j % 20 != 0 else random.randint(10, 60)
-            logger.info(f"随机等待{wait_secs}秒")
+            wait_secs = random.randint(5, 30)
+            if (j+1) % 10 == 0:
+                # 每20条等待8分钟，避免被限频
+                wait_secs = 8 * 60
+            logger.info(f"第{j}个，{name}, 随机等待{wait_secs}秒")
             time.sleep(wait_secs)
             client_sign(tbs, name)
         logger.info("完成第" + str(i + 1) + "个用户签到!")
