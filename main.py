@@ -19,11 +19,10 @@ SIGN_URL = "https://tieba.baidu.com/sign/add"
 
 ENV = os.environ
 
-
 SIGN_DATA = {
     "ie": "utf-8",
     "kw": "",
-    "tbs": ""  
+    "tbs": ""
 }
 
 s = requests.Session()
@@ -42,19 +41,27 @@ def get_tbs():
 
 def get_favorite():
     logger.info("获取关注的贴吧!")
-    # 客户端关注的贴吧
-    try:
-        res = s.get(url=LIKIE_URL, timeout=5)
-    except Exception as e:
-        logger.error("获取关注的贴吧出错!")
-        logger.error(e)
-        sys.exit(1)
-    html = HTML(res.text)
-    names = html.cssselect("tr td:first-child a")
-
     ret = []
-    for name in names:
-        ret.append(name.get('title'))
+    for x in range(1, 4):
+        likeurl = f"{LIKIE_URL}?&pn={x}"
+        logger.info(f"准备获取第{x}页的关注列表. {likeurl}")
+        # 客户端关注的贴吧
+        try:
+            res = s.get(url=likeurl, timeout=5)
+        except Exception as e:
+            logger.exception("获取关注的贴吧出错!")
+            continue
+        html = HTML(res.text)
+        names = html.cssselect("tr td:first-child a")
+
+        if not names:
+            break
+        for name in names:
+            ret.append(name.get('title'))
+        wait_secs = random.randint(5, 20)
+        logger.info(f"获取到的关注贴吧数:{len(names)} 等待{wait_secs}秒")
+        time.sleep(wait_secs)
+
     return ret
 
 
@@ -71,6 +78,7 @@ def client_sign(tbs, kw):
 
 
 def main():
+    random.seed()
     cookies = os.getenv('COOKIE')
     if not cookies:
         logger.error("未配置COOKIE")
@@ -84,15 +92,18 @@ def main():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0',
     }
     for i, cookie in enumerate(cookies):
-        logger.info("开始签到第" + str(i+1) + "个用户!")
+        logger.info("开始签到第" + str(i + 1) + "个用户!")
         headers.update({"Cookie": cookie})
         s.headers.update(headers)
         favorites = get_favorite()
         tbs = get_tbs()
-        for name in favorites:
-            time.sleep(random.randint(2, 3))
+        for j, name in enumerate(favorites):
+            # 每20秒多等待一会
+            wait_secs = random.randint(5, 30) if j % 20 != 0 else random.randint(10, 60)
+            logger.info(f"随机等待{wait_secs}秒")
+            time.sleep(wait_secs)
             client_sign(tbs, name)
-        logger.info("完成第" + str(i+1) + "个用户签到!")
+        logger.info("完成第" + str(i + 1) + "个用户签到!")
     logger.info("所有用户签到结束!")
 
 
