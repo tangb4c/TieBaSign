@@ -21,4 +21,5 @@ jobs:
       - name: 'Start Sign'
         env:
           BDUSS: ${{ secrets.BDUSS }}
+          COOKIE: ${{ secrets.COOKIE }}
         run: python main.py
