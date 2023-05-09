@@ -23,7 +23,7 @@ ENV = os.environ
 SIGN_DATA = {
     "ie": "utf-8",
     "kw": "",
-    "tbs": ""
+    "tbs": ""  
 }
 
 s = requests.Session()
