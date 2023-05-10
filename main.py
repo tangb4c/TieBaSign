@@ -42,7 +42,7 @@ def get_tbs():
 def get_favorite():
     logger.info("获取关注的贴吧!")
     ret = []
-    for x in range(1, 4):
+    for x in range(1, 5):
         likeurl = f"{LIKIE_URL}?&pn={x}"
         logger.info(f"准备获取第{x}页的关注列表. {likeurl}")
         # 客户端关注的贴吧
@@ -61,7 +61,7 @@ def get_favorite():
         wait_secs = random.randint(5, 20)
         logger.info(f"获取到的关注贴吧数:{len(names)} 等待{wait_secs}秒")
         time.sleep(wait_secs)
-
+    ret.reverse()
     return ret
 
 
