@@ -58,7 +58,7 @@ def get_favorite():
             break
         for name in names:
             ret.append(name.get('title'))
-        wait_secs = random.randint(5, 20)
+        wait_secs = random.randint(2, 5)
         logger.info(f"获取到的关注贴吧数:{len(names)} 等待{wait_secs}秒")
         time.sleep(wait_secs)
     ret.reverse()
@@ -99,10 +99,10 @@ def main():
         tbs = get_tbs()
         for j, name in enumerate(favorites):
             # 每20秒多等待一会
-            wait_secs = random.randint(5, 30)
+            wait_secs = random.randint(2, 5)
             if (j+1) % 10 == 0:
-                # 每20条等待8分钟，避免被限频
-                wait_secs = 8 * 60
+                # 每10条等待6分钟，避免被限频
+                wait_secs = 6 * 60
             logger.info(f"第{j}个，{name}, 随机等待{wait_secs}秒")
             time.sleep(wait_secs)
             client_sign(tbs, name)
