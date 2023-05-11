@@ -7,6 +7,7 @@ import copy
 import logging
 import random
 
+from urllib.parse import quote_plus
 from lxml.etree import HTML
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -73,8 +74,17 @@ def client_sign(tbs, kw):
     res_json = s.post(url=SIGN_URL, data=data).json()
     if res_json["no"] == 1101:
         logger.info(f"{kw}吧 已签到!")
+        return 0
     elif res_json["no"] != 0:
         logger.error(f"{kw}吧 签到出现错误!")
+        return -1
+    return 1
+
+
+def send_message(msg):
+    url = f"{os.getenv('NOTIFY_URL')}/{quote_plus(msg)}"
+    body = requests.get(url).text
+    logger.info(f"send msg result:{body}")
 
 
 def main():
@@ -97,15 +107,26 @@ def main():
         s.headers.update(headers)
         favorites = get_favorite()
         tbs = get_tbs()
+        signed_count = skipped_count = 0
+        failed_list = list()
         for j, name in enumerate(favorites):
             # 每20秒多等待一会
             wait_secs = random.randint(2, 5)
-            if (j+1) % 10 == 0:
+            if (j + 1) % 10 == 0:
                 # 每10条等待6分钟，避免被限频
                 wait_secs = 6 * 60
             logger.info(f"第{j}个，{name}, 随机等待{wait_secs}秒")
             time.sleep(wait_secs)
-            client_sign(tbs, name)
+            result = client_sign(tbs, name)
+            if result == 1:
+                signed_count += 1
+            elif result == 0:
+                skipped_count += 1
+            elif result == -1:
+                failed_list.append(name)
+        summary = f"贴吧总数:{len(favorites)} 签到:{signed_count}个 跳过:{skipped_count}个 失败:{len(failed_list)}个 {','.join(failed_list)}"
+        logger.info(summary)
+        send_message(summary)
         logger.info("完成第" + str(i + 1) + "个用户签到!")
     logger.info("所有用户签到结束!")
 
