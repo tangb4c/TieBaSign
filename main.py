@@ -82,9 +82,12 @@ def client_sign(tbs, kw):
 
 
 def send_message(msg):
-    url = f"{os.getenv('NOTIFY_URL')}/{quote_plus(msg)}"
-    body = requests.get(url).text
-    logger.info(f"send msg result:{body}")
+    if os.getenv('NOTIFY') == 'true':
+        url = f"{os.getenv('NOTIFY_URL')}/{quote_plus(msg)}"
+        body = requests.get(url).text
+        logger.info(f"send msg result:{body}")
+    else:
+        logger.info(f"通知开关为：{os.getenv('NOTIFY')}，不再通知")
 
 
 def main():

@@ -21,5 +21,6 @@ jobs:
       - name: 'Start Sign'
         env:
           COOKIE: ${{ secrets.COOKIE }}
+          NOTIFY: ${{ secrets.NOTIFY }}
           NOTIFY_URL: ${{ secrets.NOTIFY_URL }}
         run: python main.py
